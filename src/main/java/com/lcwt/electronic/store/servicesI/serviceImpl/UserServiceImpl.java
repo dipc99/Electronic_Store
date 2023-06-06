@@ -39,8 +39,8 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public UserDto createUser(UserDto userDto) {
         //generate unique id in Long format
-        Long userId= Long.valueOf(UUID.randomUUID().toString());
-        userDto.setUserId(userId);
+//        Long userId= Long.valueOf(UUID.randomUUID().toString());
+//        userDto.setUserId(userId);
         User user = this.modelMapper.map(userDto, User.class);
         log.info("Entering DAO call for createUser");
         User user1=this.userRepo.save(user);
