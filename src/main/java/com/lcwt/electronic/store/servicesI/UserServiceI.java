@@ -1,5 +1,6 @@
 package com.lcwt.electronic.store.servicesI;
 
+import com.lcwt.electronic.store.dtos.PageableResponse;
 import com.lcwt.electronic.store.dtos.UserDto;
 import com.lcwt.electronic.store.entities.User;
 
@@ -13,12 +14,12 @@ public interface UserServiceI {
 
     void deleteUser(Long userId);
 
-    List<UserDto> getAllUser(Integer pageNumber, Integer pageSize);
+    PageableResponse<UserDto> getAllUser(Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
     //get single user by id
     UserDto getUserById(Long userId);
     //get single user by email
-    UserDto getUserByemail(String email);
+    User getUserByemail(String email);
     //SearchUser by keyword
-    List<UserDto> searchUser(String keyword);
+    List<User> searchUser(String keyword);
 
 }

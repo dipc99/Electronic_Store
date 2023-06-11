@@ -1,6 +1,8 @@
 package com.lcwt.electronic.store.controller;
 
+import com.lcwt.electronic.store.dtos.PageableResponse;
 import com.lcwt.electronic.store.dtos.UserDto;
+import com.lcwt.electronic.store.entities.User;
 import com.lcwt.electronic.store.helper.AppConstants;
 import com.lcwt.electronic.store.servicesI.UserServiceI;
 import org.slf4j.Logger;
@@ -49,33 +51,35 @@ public class UserController {
         return new ResponseEntity<>(userById, HttpStatus.OK);
     }
     @GetMapping("/users")
-    public ResponseEntity<List<UserDto>> getAllUser(@RequestParam (value = "pageSize",defaultValue = "5",required = false) Integer pageSize,
-                                                                                @RequestParam (value = "pageNumber", defaultValue = "0") Integer pageNumber){
+    public ResponseEntity<PageableResponse<UserDto>> getAllUser(@RequestParam (value = "pageSize",defaultValue = "3",required = false) Integer pageSize,
+                                                       @RequestParam (value = "pageNumber", defaultValue = "0",required = false) Integer pageNumber,
+                                                       @RequestParam (value = "sortBy", defaultValue = "userName",required = false) String sortBy,
+                                                       @RequestParam(value = "sortDir",defaultValue = "asc",required = false) String sortDir  ){
         log.info("Request for getAllUser");
-        List<UserDto> allUser = this.userServiceI.getAllUser(pageNumber,pageSize);
+        PageableResponse<UserDto> allUser = this.userServiceI.getAllUser(pageNumber, pageSize, sortBy, sortDir);
         log.info("Request completed for getAllUser");
         return new ResponseEntity<>(allUser, HttpStatus.OK);
     }
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId){
+    public ResponseEntity<String> deleteUser(@PathVariable("userId") Long userId){
         log.info("request entering for delete user with userId:{}",userId);
         this.userServiceI.deleteUser(userId);
         log.info("request completed for delete user with userId:{}",userId);
         return new ResponseEntity<String>(AppConstants.USER_DELETE, HttpStatus.OK);
     }
-    @GetMapping("/users/{email}")
-    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
+    @GetMapping("/userrs/{email}")
+    public ResponseEntity<User> getUserByEmail(@PathVariable("email") String email){
         log.info("request for getUser with email:{}",email);
-        UserDto userByemail = this.userServiceI.getUserByemail(email);
+        User userByemail = this.userServiceI.getUserByemail(email);
         log.info("request completed for getUser with email:{}",email);
-        return new ResponseEntity<>(userByemail,HttpStatus.OK);
+        return new ResponseEntity<User>(userByemail,HttpStatus.OK);
     }
 
-    @GetMapping("/users/{keyword}")
-    public ResponseEntity<List<UserDto>> searchUser(@PathVariable String keyword){
+    @GetMapping("/user/{keyword}")
+    public ResponseEntity<List<User>> searchUser(@PathVariable("keyword") String keyword){
         log.info("request for searchUser with keyword:{}",keyword);
-        List<UserDto> searchUser = this.userServiceI.searchUser(keyword);
+        List<User> users = this.userServiceI.searchUser(keyword);
         log.info("request completed for searchUser with keyword:{}",keyword);
-        return new ResponseEntity<List<UserDto>>(searchUser,HttpStatus.OK);
+        return new ResponseEntity<List<User>>(users,HttpStatus.OK);
     }
 }
