@@ -1,12 +1,13 @@
 package com.lcwt.electronic.store.servicesI.serviceImpl;
 
+import com.lcwt.electronic.store.dtos.PageableResponse;
 import com.lcwt.electronic.store.dtos.UserDto;
 import com.lcwt.electronic.store.entities.User;
 import com.lcwt.electronic.store.exceptions.ResourceNotFoundException;
 import com.lcwt.electronic.store.helper.AppConstants;
+import com.lcwt.electronic.store.helper.Helper;
 import com.lcwt.electronic.store.repositories.UserRepo;
 import com.lcwt.electronic.store.servicesI.UserServiceI;
-import org.hibernate.type.UUIDBinaryType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,15 +77,14 @@ public class UserServiceImpl implements UserServiceI {
     }
 
     @Override
-    public List<UserDto> getAllUser(Integer pageNumber, Integer pageSize) {
+    public PageableResponse<UserDto> getAllUser(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         log.info("EnteringDAO call for getAllUser");
-        Pageable p= PageRequest.of(pageNumber,pageSize);
+        Sort sort = (sortDir.equalsIgnoreCase("desc"))?(Sort.by(sortBy).descending()):(Sort.by(sortBy).ascending()) ;
+        Pageable p= PageRequest.of(pageNumber,pageSize,sort);
         Page<User> findAll = this.userRepo.findAll(p);
-        List<User> users = findAll.getContent();
-
-        List<UserDto> userDtos = users.stream().map(user -> this.modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
         log.info("completed DAO call for getAllUser");
-        return userDtos;
+        PageableResponse<UserDto> response = Helper.getPageableResponse(findAll, UserDto.class);
+        return response;
     }
 
     @Override
@@ -98,20 +98,20 @@ public class UserServiceImpl implements UserServiceI {
     }
 
     @Override
-    public UserDto getUserByemail(String email) {
+    public User getUserByemail(String email) {
         log.info("Entering DAO call for get user with email:{}",email);
-        UserDto userDto1 = this.userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException(AppConstants.NOT_FOUND));
-        UserDto userDto = this.modelMapper.map(userDto1, UserDto.class);
+        User user = this.userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException(AppConstants.NOT_FOUND));
+        //UserDto userDto = this.modelMapper.map(user, UserDto.class);
         log.info("completed DAO call for find user with email:{}",email);
-        return  userDto;
+        return  user;
     }
 
     @Override
-    public List<UserDto> searchUser(String keyword) {
+    public List<User> searchUser(String keyword) {
         log.info("Entering DAO call for search user with keyword:{}",keyword);
-        List<UserDto>  users = this.userRepo.findByUserNameContaining(keyword);
-        List<UserDto> userDtos = users.stream().map((user) -> this.modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
+        List<User> users = this.userRepo.findByUserNameContaining(keyword);
+        //List<UserDto> userDtos = users.stream().map((user) -> this.modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
         log.info("Completed DAO call for serach user with keyword:{}",keyword);
-        return userDtos;
+        return users;
     }
 }
