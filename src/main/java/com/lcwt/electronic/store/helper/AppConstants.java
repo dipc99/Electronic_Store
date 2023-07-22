@@ -8,12 +8,12 @@ public class AppConstants {
     public static final String USER_ID="userId";
     public static final String USER="User";
 
-//    //CART
-//    public static final String USER_CART ="Cart of given user ";
-//    public static final String PRODUCT_CART ="Product Not found in DB";
-//    public static final String QUANTITY="Requested quantity is not valid";
-//    public static final String CART_ITEM="cartItem";
-//
+    //CART
+    public static final String USER_CART ="Cart of given user ";
+    public static final String PRODUCT_CART ="Product Not found in DB";
+    public static final String QUANTITY="Requested quantity is not valid";
+    public static final String CART_ITEM="cartItem";
+
 //    //API_RESPONSE
 //    public static final String API_RESPONSE1="Item is remove !!";
 //    public static final String API_RESPONSE="Now cart is blank !!";
