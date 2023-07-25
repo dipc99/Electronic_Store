@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserServiceI {
 //        Long userId= Long.valueOf(UUID.randomUUID().toString());
 //        userDto.setUserId(userId);
         User user = this.modelMapper.map(userDto, User.class);
-        log.info("Entering DAO call for createUser");
+        log.info("Initiating the DAO call for createUser");
         User user1=this.userRepo.save(user);
         log.info("completed DAO call of createUser...");
         return this.modelMapper.map(user1,UserDto.class);
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public UserDto updateUser(UserDto userDto, Long userId) {
         log.info("Entering DAO call for updating User with userId:{} ",userId);
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException(AppConstants.USER, AppConstants.USER_ID, userId));
 
       //  user.setUserId(userDto.getUserId());
         user.setUserName(userDto.getUserName());
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public void deleteUser(Long userId) {
         log.info("Entering DAO call for delete user with userId:{}",userId);
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException(AppConstants.USER, AppConstants.USER_ID, userId));
         this.userRepo.deleteById(userId);
         log.info("completed DAO call for deleteUser using userId:{}",userId);
     }
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserServiceI {
     @Override
     public PageableResponse<UserDto> getAllUser(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         log.info("EnteringDAO call for getAllUser");
-        Sort sort = (sortDir.equalsIgnoreCase("desc"))?(Sort.by(sortBy).descending()):(Sort.by(sortBy).ascending()) ;
+        Sort sort = (sortDir.equalsIgnoreCase(AppConstants.SORT_DESC))?(Sort.by(sortBy).descending()):(Sort.by(sortBy).ascending()) ;
         Pageable p= PageRequest.of(pageNumber,pageSize,sort);
         Page<User> findAll = this.userRepo.findAll(p);
         log.info("completed DAO call for getAllUser");
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserServiceI {
     public UserDto getUserById(Long userId)
     {
         log.info("Entering DAO call for find single user by userId:{}",userId);
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException(AppConstants.USER, AppConstants.USER_ID, userId));
         UserDto userDto = this.modelMapper.map(user, UserDto.class);
         log.info("Completed DAO call for get single user with userId :{}",userId);
         return userDto;
@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserServiceI {
         log.info("Entering DAO call for search user with keyword:{}",keyword);
         List<User> users = this.userRepo.findByUserNameContaining(keyword);
         //List<UserDto> userDtos = users.stream().map((user) -> this.modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
-        log.info("Completed DAO call for serach user with keyword:{}",keyword);
+        log.info("Completed DAO call for search user with keyword:{}",keyword);
         return users;
     }
 }
