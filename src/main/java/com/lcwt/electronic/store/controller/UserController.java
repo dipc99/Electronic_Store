@@ -1,28 +1,41 @@
 package com.lcwt.electronic.store.controller;
 
+import com.lcwt.electronic.store.dtos.ImageResponse;
 import com.lcwt.electronic.store.dtos.PageableResponse;
 import com.lcwt.electronic.store.dtos.UserDto;
 import com.lcwt.electronic.store.entities.User;
 import com.lcwt.electronic.store.helper.AppConstants;
+import com.lcwt.electronic.store.servicesI.FileService;
 import com.lcwt.electronic.store.servicesI.UserServiceI;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 public class UserController {
-
-    private static Logger log= LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserServiceI userServiceI;
+    @Autowired
+    private FileService fileService;
+    @Value("${user.profile.image.path}")
+    private String imageUploadPath;
     /**
      * @author DipaliC
      * @apiNote Methods For User Controller
@@ -41,7 +54,7 @@ public class UserController {
         log.info("Request entering for update user with userId:{}",userId);
         UserDto userDto1 = this.userServiceI.updateUser(userDto, userId);
         log.info("request completed for update user with userId:{}",userId);
-        return new ResponseEntity<>(userDto1,HttpStatus.CREATED);
+        return new ResponseEntity<>(userDto1,HttpStatus.OK);
     }
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserDto> getSingleUserById(@PathVariable Long userId){
@@ -80,6 +93,33 @@ public class UserController {
         log.info("request for searchUser with keyword:{}",keyword);
         List<User> users = this.userServiceI.searchUser(keyword);
         log.info("request completed for searchUser with keyword:{}",keyword);
-        return new ResponseEntity<List<User>>(users,HttpStatus.OK);
+        return new ResponseEntity<List<User>>(users,HttpStatus.FOUND);
+    }
+    //upload user image
+    @PostMapping("/image/{userId}")
+    public ResponseEntity<ImageResponse> uploadUserImage(
+            @RequestPart("userImage" ) MultipartFile image,
+            @PathVariable Long userId
+            ) throws IOException {
+        log.info("Initiated request for upload User Image with  userId:{}",userId);
+        String imageName = fileService.uploadFile(image, imageUploadPath);
+        UserDto user = userServiceI.getUserById(userId);
+        user.setImage_name(imageName);
+        UserDto userDto = userServiceI.updateUser(user, userId);
+        ImageResponse response = ImageResponse.builder().imageName(imageName).status(HttpStatus.CREATED).build();
+        log.info("Completed request for upload user image with  userId:{}",userId);
+        return new ResponseEntity<>(response,HttpStatus.CREATED);
+    }
+    //serve user image
+    @GetMapping("/image/{userId}")
+    public void serveUserImage(@PathVariable Long userId,HttpServletResponse response) throws IOException {
+        log.info("Initiated request for serve image details with  userId:{}",userId);
+        UserDto user = userServiceI.getUserById(userId);
+        log.info("User Image name:{}",user.getImage_name());
+        InputStream resource = fileService.getResource(imageUploadPath, user.getImage_name());
+        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+        StreamUtils.copy(resource,response.getOutputStream());
+        log.info("Completed request for serve image details with  userId:{}",userId);
+
     }
 }
